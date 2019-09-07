@@ -8,16 +8,12 @@ package proj1;
 public class Maze {
 
     private final char SPACE = '.';
-    private final char WALL = '#';
     private final char START = '$';
     private final char END = '%';
 
     /**
      * Finds the path using {@code proj1.MyStack}.
      * Returns the path and number of spaces checked as {@code String}.
-     *
-     * @param {@code char[][]} provide.
-     * @return the path and number of spaces checked as {@code String}
      */
     private static class Coordinate {
         private int x;
@@ -50,6 +46,10 @@ public class Maze {
         }
     }
 
+    /**
+     * @param map {@code char[][]} provide.
+     * @return the path and number of spaces checked as {@code String}
+     */
     public String solveWithStack(char[][] map) {
         if (map == null) {
             return "no way";
@@ -65,9 +65,6 @@ public class Maze {
         StringBuilder solution = new StringBuilder();
         while (!processed.isEmpty()) {
             solution.insert(0, processed.pop().toString());
-        }
-        if (spacesChecked[0] > 5000) {
-            spacesChecked[0]--;
         }
         solution.append(' ').append(spacesChecked[0]);
         return solution.toString();
@@ -95,11 +92,11 @@ public class Maze {
             boolean spaceFound = false;
             for (Coordinate neighbor : new Coordinate[]{down, right, up, left}) {
                 char space = addOpenSpace(neighbor, map, processed, unprocessed, duds);
-                if (space == '%') {
+                if (space == END) {
                     processed.push(neighbor);
                     return true;
                 }
-                spaceFound = spaceFound || space == '.';
+                spaceFound = spaceFound || space == SPACE;
             }
 
             // backtrack
@@ -111,7 +108,7 @@ public class Maze {
                 left = new Coordinate(coord.x, coord.y - 1);
                 for (Coordinate neighbor : new Coordinate[]{down, right, up, left}) {
                     char space = addOpenSpace(neighbor, map, processed, null, duds);
-                    if (spaceFound = (space == '.' || space == '%')) {
+                    if (spaceFound = (space == SPACE || space == END)) {
                         break;
                     }
                 }
@@ -132,8 +129,8 @@ public class Maze {
         if (processed.contains(coord) || duds.contains(coord)) {
             return '\0';
         }
-        if ((((map[coord.x][coord.y] == '.' || map[coord.x][coord.y] == '%') && (coord.x != 0 || coord.y != 0)) ||
-            (map[coord.x][coord.y] == '$' && coord.x == 0 && coord.y == 0))) {
+        if ((((map[coord.x][coord.y] == SPACE || map[coord.x][coord.y] == END) && (coord.x != 0 || coord.y != 0)) ||
+            (map[coord.x][coord.y] == START && coord.x == 0 && coord.y == 0))) {
             if (unprocessed != null) {
                 unprocessed.push(coord);
             }
@@ -151,6 +148,9 @@ public class Maze {
         MyQueue<Coordinate> processed = new MyQueue<>();
         int[] spacesChecked = {0};
         processed = processOpenSpaces(map, unprocessed, processed, spacesChecked);
+        if(processed == null) {
+            return "no way";
+        }
         StringBuilder solution = new StringBuilder();
         while (!processed.isEmpty()) {
             solution.insert(0, processed.dequeue().toString());
@@ -183,12 +183,12 @@ public class Maze {
             boolean spaceFound = false;
             for (Coordinate neighbor : new Coordinate[]{down, right, up, left}) {
                 char space = addOpenSpace(neighbor, map, processed, unprocessed, duds);
-                if (space == '%') {
+                if (space == END) {
                     processed.enqueue(neighbor);
                     result = true;
                     break outer;
                 }
-                spaceFound = spaceFound || space == '.';
+                spaceFound = spaceFound || space == SPACE;
             }
         }
 
@@ -244,8 +244,8 @@ public class Maze {
         if (processed.contains(coord) || duds.contains(coord)) {
             return '\0';
         }
-        if ((((map[coord.x][coord.y] == '.' || map[coord.x][coord.y] == '%') && (coord.x != 0 || coord.y != 0)) ||
-            (map[coord.x][coord.y] == '$' && coord.x == 0 && coord.y == 0))) {
+        if ((((map[coord.x][coord.y] == SPACE || map[coord.x][coord.y] == END) && (coord.x != 0 || coord.y != 0)) ||
+            (map[coord.x][coord.y] == START && coord.x == 0 && coord.y == 0))) {
             if (unprocessed != null) {
                 unprocessed.enqueue(coord);
             }

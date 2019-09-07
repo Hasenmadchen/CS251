@@ -84,6 +84,7 @@ public class MyStack<E> {
         if (count <= stack.length / INEFFICIENCY_COEFF) {
             resize(stack.length / GROWTH_FACTOR + 1);
         }
+        //noinspection unchecked
         return (E) obj;
     }
 
@@ -96,6 +97,7 @@ public class MyStack<E> {
         if (isEmpty()) {
             return null;
         }
+        //noinspection unchecked
         return (E) stack[count - 1];
     }
 
