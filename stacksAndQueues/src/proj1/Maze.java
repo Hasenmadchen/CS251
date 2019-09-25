@@ -1,5 +1,6 @@
 package proj1;
 
+
 /**
  * proj1.Maze.java
  * <p>
@@ -58,25 +59,28 @@ public class Maze {
         unprocessed.push(new Coordinate(0, 0));
         MyStack<Coordinate> processed = new MyStack<>();
         int[] spacesChecked = {0};
-        boolean solvable = processOpenSpaces(map, unprocessed, processed, spacesChecked);
-        if (!solvable) {
+        MyStack<Coordinate> result = processOpenSpaces(map, unprocessed, processed, spacesChecked);
+        if (result == null) {
             return "no way";
         }
         StringBuilder solution = new StringBuilder();
-        while (!processed.isEmpty()) {
-            solution.insert(0, processed.pop().toString());
+        while (!result.isEmpty()) {
+            solution.append(result.pop().toString());
         }
         solution.append(' ').append(spacesChecked[0]);
         return solution.toString();
     }
 
-    private boolean processOpenSpaces(char[][] map, MyStack<Coordinate> unprocessed, MyStack<Coordinate> processed,
+    private MyStack<Coordinate> processOpenSpaces(char[][] map, MyStack<Coordinate> unprocessed, MyStack<Coordinate> processed,
                                       int[] spacesChecked) {
         MyStack<Coordinate> duds = new MyStack<>();
+        MyStack<Coordinate> result;
+        outer:
         while (true) {
             Coordinate coord = unprocessed.pop();
             if (coord == null) {
-                return false;
+                result = null;
+                break;
             }
             if (!coord.isValid(map)) {
                 continue;
@@ -87,37 +91,25 @@ public class Maze {
             Coordinate up = new Coordinate(coord.x - 1, coord.y);
             Coordinate left = new Coordinate(coord.x, coord.y - 1);
 
-            processed.push(coord);
-            spacesChecked[0]++;
+            if(!processed.contains(coord)) {
+                processed.push(coord);
+                spacesChecked[0]++;
+            }
             boolean spaceFound = false;
             for (Coordinate neighbor : new Coordinate[]{down, right, up, left}) {
                 char space = addOpenSpace(neighbor, map, processed, unprocessed, duds);
                 if (space == END) {
                     processed.push(neighbor);
-                    return true;
+                    result = processed;
+                    break outer;
                 }
                 spaceFound = spaceFound || space == SPACE;
             }
-
-            // backtrack
-            while (!spaceFound) {
-                coord = processed.peek();
-                down = new Coordinate(coord.x + 1, coord.y);
-                right = new Coordinate(coord.x, coord.y + 1);
-                up = new Coordinate(coord.x - 1, coord.y);
-                left = new Coordinate(coord.x, coord.y - 1);
-                for (Coordinate neighbor : new Coordinate[]{down, right, up, left}) {
-                    char space = addOpenSpace(neighbor, map, processed, null, duds);
-                    if (spaceFound = (space == SPACE || space == END)) {
-                        break;
-                    }
-                }
-                if (!spaceFound) {
-                    processed.pop();
-                    duds.push(coord);
-                }
-            }
         }
+        if(result != null) {
+            result = removeDead(result, map);
+        }
+        return result;
     }
 
     private char addOpenSpace(Coordinate coord, char[][] map, MyStack<Coordinate> processed,
@@ -139,6 +131,47 @@ public class Maze {
         return '\0';
     }
 
+    private MyStack<Coordinate> removeDead(MyStack<Coordinate> processed, char[][] map) {
+        MyStack<Coordinate> result = new MyStack<>();
+        Coordinate csr = null;
+        while (!processed.isEmpty()) {
+            Coordinate coord = processed.pop();
+            if (csr != null) {
+                Coordinate down = new Coordinate(csr.x + 1, csr.y);
+                if (down.isValid(map) && coord.equals(down)) {
+                    result.push(coord);
+                    csr = coord;
+                } else {
+                    Coordinate right = new Coordinate(csr.x, csr.y + 1);
+                    if (right.isValid(map) && coord.equals(right)) {
+                        result.push(coord);
+                        csr = coord;
+                    } else {
+                        Coordinate up = new Coordinate(csr.x - 1, csr.y);
+                        if (up.isValid(map) && coord.equals(up)) {
+                            result.push(coord);
+                            csr = coord;
+                        } else {
+                            Coordinate left = new Coordinate(csr.x, csr.y - 1);
+                            if (left.isValid(map) && coord.equals(left)) {
+                                result.push(coord);
+                                csr = coord;
+                            }
+                        }
+                    }
+                }
+            } else {
+                csr = coord;
+                result.push(csr);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @param map {@code char[][]} provide.
+     * @return the path and number of spaces checked as {@code String}
+     */
     public String solveWithQueue(char[][] map) {
         if (map == null) {
             return "no way";
@@ -159,8 +192,8 @@ public class Maze {
         return solution.toString();
     }
 
-    private MyQueue<Coordinate> processOpenSpaces(char[][] map, MyQueue<Coordinate> unprocessed, MyQueue<Coordinate> processed,
-                                      int[] spacesChecked) {
+    private MyQueue<Coordinate> processOpenSpaces(char[][] map, MyQueue<Coordinate> unprocessed,
+                                                  MyQueue<Coordinate> processed, int[] spacesChecked) {
         MyQueue<Coordinate> duds = new MyQueue<>();
         boolean result = false;
         outer:
@@ -178,8 +211,10 @@ public class Maze {
             Coordinate up = new Coordinate(coord.x - 1, coord.y);
             Coordinate left = new Coordinate(coord.x, coord.y - 1);
 
-            processed.enqueue(coord);
-            spacesChecked[0]++;
+            if(!processed.contains(coord)) {
+                processed.enqueue(coord);
+                spacesChecked[0]++;
+            }
             boolean spaceFound = false;
             for (Coordinate neighbor : new Coordinate[]{down, right, up, left}) {
                 char space = addOpenSpace(neighbor, map, processed, unprocessed, duds);
@@ -196,6 +231,25 @@ public class Maze {
             return removeDead(processed, map);
         }
         return null;
+    }
+
+    private char addOpenSpace(Coordinate coord, char[][] map, MyQueue<Coordinate> processed,
+                              MyQueue<Coordinate> unprocessed, MyQueue<Coordinate> duds) {
+        if (!coord.isValid(map)) {
+            return '\0';
+        }
+
+        if (processed.contains(coord) || duds.contains(coord)) {
+            return '\0';
+        }
+        if ((((map[coord.x][coord.y] == SPACE || map[coord.x][coord.y] == END) && (coord.x != 0 || coord.y != 0)) ||
+            (map[coord.x][coord.y] == START && coord.x == 0 && coord.y == 0))) {
+            if (unprocessed != null) {
+                unprocessed.enqueue(coord);
+            }
+            return map[coord.x][coord.y];
+        }
+        return '\0';
     }
 
     private MyQueue<Coordinate> removeDead(MyQueue<Coordinate> processed, char[][] map) {
@@ -233,24 +287,5 @@ public class Maze {
             }
         }
         return result;
-    }
-
-    private char addOpenSpace(Coordinate coord, char[][] map, MyQueue<Coordinate> processed,
-                              MyQueue<Coordinate> unprocessed, MyQueue<Coordinate> duds) {
-        if (!coord.isValid(map)) {
-            return '\0';
-        }
-
-        if (processed.contains(coord) || duds.contains(coord)) {
-            return '\0';
-        }
-        if ((((map[coord.x][coord.y] == SPACE || map[coord.x][coord.y] == END) && (coord.x != 0 || coord.y != 0)) ||
-            (map[coord.x][coord.y] == START && coord.x == 0 && coord.y == 0))) {
-            if (unprocessed != null) {
-                unprocessed.enqueue(coord);
-            }
-            return map[coord.x][coord.y];
-        }
-        return '\0';
     }
 }
