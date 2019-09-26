@@ -1,7 +1,6 @@
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -171,6 +170,7 @@ public final class Node<K extends Comparable<? super K>, V> {
      * @param leftChild the left child to be used in the update
      */
     public void setLeftChild(Node<K, V> leftChild) {
+        if(this == leftChild) throw new RuntimeException();
         this.leftChild = leftChild;
         if (leftChild != null) {
             leftChild.parent = this;
@@ -183,6 +183,7 @@ public final class Node<K extends Comparable<? super K>, V> {
      * @param rightChild the right child to be used in the update
      */
     public void setRightChild(Node<K, V> rightChild) {
+        if(this == rightChild) throw new RuntimeException();
         this.rightChild = rightChild;
         if (rightChild != null) {
             rightChild.parent = this;

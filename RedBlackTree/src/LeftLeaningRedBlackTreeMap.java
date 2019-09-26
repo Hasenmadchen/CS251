@@ -12,27 +12,28 @@ public class LeftLeaningRedBlackTreeMap<K extends Comparable<? super K>, V> {
             throw new NullPointerException("key is null");
         }
 
-        int oldSize = size;
-        Node<K, V> node = findOrMakeNode(root, key, value);
-        node = adjust(node);
-        return oldSize > size ? node.getValue() : null;
+        V oldValue = get(key);
+        root = putAndAdjust(root, key, value);
+        root.setColor(Color.BLACK);
+        root.setParent(null);
+        return oldValue;
     }
 
-    private Node<K, V> findOrMakeNode(Node<K, V> node, K key, V value) {
-        if (node == null) {
+    public Node<K, V> putAndAdjust(Node<K, V> position, K key, V value) throws NullPointerException {
+        if (position == null) {
             size++;
             return new Node<>(Color.RED, key, value, null, null, null);
         }
 
-        int compare = key.compareTo(node.getKey());
+        int compare = key.compareTo(position.getKey());
         if (compare < 0) {
-            node.setLeftChild(findOrMakeNode(node.getLeftChild(), key, value));
+            position.setLeftChild(putAndAdjust(position.getLeftChild(), key, value));
         } else if (compare > 0) {
-            node.setRightChild(findOrMakeNode(node.getRightChild(), key, value));
+            position.setRightChild(putAndAdjust(position.getRightChild(), key, value));
         } else {
-            node.setValue(value);
+            position.setValue(value);
         }
-        return node;
+        return adjust(position);
     }
 
     private Node<K, V> adjust(Node<K, V> node) {
@@ -86,24 +87,30 @@ public class LeftLeaningRedBlackTreeMap<K extends Comparable<? super K>, V> {
         return node != null && node.getColor() == Color.RED;
     }
 
-    public K ceilingKey(K key) {
+    public K ceilingKey(K key) throws NullPointerException {
         if (key == null) {
             throw new NullPointerException();
         }
-        Node<K, V> node = findNode(key, root);
-        if (node.getRightChild() == null) {
+        Node<K, V> node = findCeiling(key, root);
+        if (node == null) {
             return null;
         } else {
-            if (node.getRightChild().getLeftChild() == null) {
-                return node.getRightChild().getKey();
-            } else {
-                node = node.getRightChild();
-                while (node.getLeftChild() != null) {
-                    node = node.getLeftChild();
-                }
-                return node.getKey();
-            }
+            return node.getKey();
         }
+    }
+
+    private Node<K, V> findCeiling(K key, Node<K, V> node) {
+        if (node == null) {
+            return null;
+        }
+        Node<K, V> result = findCeiling(key, node.getLeftChild());
+        if (result != null) {
+            return result;
+        }
+        if (node.getKey().compareTo(key) >= 0) {
+            return node;
+        }
+        return findCeiling(key, node.getRightChild());
     }
 
     private Node<K, V> findNode(K key, Node<K, V> node) {
@@ -126,7 +133,7 @@ public class LeftLeaningRedBlackTreeMap<K extends Comparable<? super K>, V> {
         size = 0;
     }
 
-    public boolean containsKey(K key) {
+    public boolean containsKey(K key) throws NullPointerException {
         return findNode(key, root) != null;
     }
 
@@ -164,19 +171,19 @@ public class LeftLeaningRedBlackTreeMap<K extends Comparable<? super K>, V> {
             return false;
         }
 
-        boolean[] same = {false};
+        boolean[] isEqual = {true};
         root.breadthFirst( node -> {
             Node thatNode = that.findNode(node.getKey(), that.root);
             if(thatNode == null || !thatNode.equals(node)) {
-                same[0] = false;
+                isEqual[0] = false;
                 return false;
             }
             return true;
         });
-        return same[0];
+        return isEqual[0];
     }
 
-    public K firstKey() {
+    public K firstKey() throws NullPointerException {
         if (root.getLeftChild() == null) {
             return root.getKey();
         } else {
@@ -188,27 +195,33 @@ public class LeftLeaningRedBlackTreeMap<K extends Comparable<? super K>, V> {
         }
     }
 
-    public K floorKey(K key) {
+    public K floorKey(K key) throws NullPointerException {
         if (key == null) {
             throw new NullPointerException();
         }
-        Node<K, V> node = findNode(key, root);
-        if (node.getLeftChild() == null) {
+        Node<K, V> node = findFloor(key, root);
+        if (node == null) {
             return null;
         } else {
-            if (node.getLeftChild().getRightChild() == null) {
-                return node.getLeftChild().getKey();
-            } else {
-                node = node.getLeftChild();
-                while (node.getRightChild() != null) {
-                    node = node.getRightChild();
-                }
-                return node.getKey();
-            }
+            return node.getKey();
         }
     }
 
-    public V get(K key) {
+    private Node<K, V> findFloor(K key, Node<K, V> node) {
+        if (node == null) {
+            return null;
+        }
+        Node<K, V> result = findFloor(key, node.getRightChild());
+        if (result != null) {
+            return result;
+        }
+        if (node.getKey().compareTo(key) <= 0) {
+            return node;
+        }
+        return findFloor(key, node.getLeftChild());
+    }
+
+    public V get(K key) throws NullPointerException {
         if (key == null) {
             throw new NullPointerException("key is null");
         }
@@ -216,15 +229,37 @@ public class LeftLeaningRedBlackTreeMap<K extends Comparable<? super K>, V> {
         return node == null ? null : node.getValue();
     }
 
-    public K higherKey(K key) {
+    public K higherKey(K key) throws NullPointerException {
+        if (key == null) {
+            throw new NullPointerException();
+        }
+        Node<K, V> node = findHigher(key, root);
+        if (node == null) {
+            return null;
+        } else {
+            return node.getKey();
+        }
+    }
 
+    private Node<K, V> findHigher(K key, Node<K, V> node) {
+        if (node == null) {
+            return null;
+        }
+        Node<K, V> result = findHigher(key, node.getLeftChild());
+        if (result != null) {
+            return result;
+        }
+        if (node.getKey().compareTo(key) > 0) {
+            return node;
+        }
+        return findHigher(key, node.getRightChild());
     }
 
     public boolean isEmpty() {
         return (size == 0);
     }
 
-    public K lastKey() {
+    public K lastKey() throws NullPointerException {
         if (root.getRightChild() == null) {
             return root.getKey();
         } else {
@@ -236,8 +271,30 @@ public class LeftLeaningRedBlackTreeMap<K extends Comparable<? super K>, V> {
         }
     }
 
-    public K lowerKey(K key) {
+    public K lowerKey(K key) throws NullPointerException {
+        if (key == null) {
+            throw new NullPointerException();
+        }
+        Node<K, V> node = findLower(key, root);
+        if (node == null) {
+            return null;
+        } else {
+            return node.getKey();
+        }
+    }
 
+    private Node<K, V> findLower(K key, Node<K, V> node) {
+        if (node == null) {
+            return null;
+        }
+        Node<K, V> result = findLower(key, node.getRightChild());
+        if (result != null) {
+            return result;
+        }
+        if (node.getKey().compareTo(key) < 0) {
+            return node;
+        }
+        return findLower(key, node.getLeftChild());
     }
 
     public int size() {
@@ -245,6 +302,19 @@ public class LeftLeaningRedBlackTreeMap<K extends Comparable<? super K>, V> {
     }
 
     public String toString() {
+        StringBuilder result = new StringBuilder();
+        root.breadthFirst( node -> {
+            if(result.length() > 0) {
+                result.append(", ");
+            }
+            result.append(node.getKey() + ": " + node.getValue());
+            return true;
+        });
+        result.append('\n');
+        return result.toString();
+    }
 
+    Node<K, V> getRoot() {
+        return root;
     }
 }
