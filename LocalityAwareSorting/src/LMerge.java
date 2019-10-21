@@ -57,9 +57,12 @@ public class LMerge extends Sort {
                 int right_end = Math.min(left_start
                     + 2 * curr_size - 1, n - 1);
 
+                //////////////////////////////////////////
                 // Narrow array size according to locality
+                //////////////////////////////////////////
                 int left = Math.min(d, mid - left_start + 1);
                 int right = d < right_end - mid ? mid + d : right_end;
+                //////////////////////////////////////////
 
                 // Merge Subarrays arr[left_start...mid] & arr[mid+1...right_end]
                 merge(arr, left, mid, right, d);

@@ -73,27 +73,22 @@ public class Merge extends Sort {
 
     /* Function to merge the two haves arr[l..m] and arr[m+1..r] of array arr[] */
     @SuppressWarnings("unchecked")
-    static void merge(Comparable[] arr, int l, int m, int r) {
-        int i, j, k;
+    static void merge(Comparable[] arr, int l, int m, int r, int d) {
         int n1 = m - l + 1;
         int n2 = r - m;
 
-        /* create temp arrays */
+        // create temp arrays
         Comparable[] L = new Comparable[n1];
         Comparable[] R = new Comparable[n2];
 
-        /* Copy data to temp arrays L[] and R[] */
-        for (i = 0; i < n1; i++) {
-            L[i] = arr[l + i];
-        }
-        for (j = 0; j < n2; j++) {
-            R[j] = arr[m + 1 + j];
-        }
+        // Copy data to temp arrays L[] and R[]
+        System.arraycopy(arr, l, L, 0, n1);
+        System.arraycopy(arr, m+1, R, 0, n2);
 
-        /* Merge the temp arrays back into arr[l..r]*/
-        i = 0;
-        j = 0;
-        k = l;
+        // Merge the temp arrays back into arr[l..r]
+        int i = 0;
+        int j = 0;
+        int k = l;
         while (i < n1 && j < n2) {
             if (L[i].compareTo(R[j]) <= 0) {
                 arr[k] = L[i];
@@ -105,14 +100,14 @@ public class Merge extends Sort {
             k++;
         }
 
-        /* Copy the remaining elements of L[], if there are any */
+        // Copy the remaining elements of L[], if there are any
         while (i < n1) {
             arr[k] = L[i];
             i++;
             k++;
         }
 
-        /* Copy the remaining elements of R[], if there are any */
+        // Copy the remaining elements of R[], if there are any
         while (j < n2) {
             arr[k] = R[j];
             j++;

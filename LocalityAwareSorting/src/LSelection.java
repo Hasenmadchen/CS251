@@ -33,7 +33,13 @@ public class LSelection extends Sort {
         for (int i = 0; i < a.length - 1; i++) {
             int minElementIndex = i;
             int start = i + 1;
+
+            //////////////////////////////////////////
+            // Limit distance in array to locality `d`
+            //////////////////////////////////////////
             int len = Math.min(start + d, a.length);
+            //////////////////////////////////////////
+
             for (int j = start; j < len; j++) {
                 Comparable csr = a[j];
                 Comparable min = a[minElementIndex];
