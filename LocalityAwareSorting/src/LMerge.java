@@ -58,7 +58,7 @@ public class LMerge extends Sort {
                     + 2 * curr_size - 1, n - 1);
 
                 //////////////////////////////////////////
-                // Narrow array size according to locality
+                // Narrow array size according to locality `d`
                 //////////////////////////////////////////
                 int left = Math.min(d, mid - left_start + 1);
                 int right = d < right_end - mid ? mid + d : right_end;
