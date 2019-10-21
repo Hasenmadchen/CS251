@@ -1,0 +1,20 @@
+void divide(int[] A) 
+  int middle = A[0]
+  int middleIndex = 0
+  for (int i = 1; i < A.length; i++)
+    int value = A[i]
+    if (value < middle)
+      shift (A, 0, i)
+      A[0] = value
+      middleIndex++
+    else if (value == middle)
+      shift (A, middleIndex, i)
+      A[middleIndex] = value
+      middleIndex++
+    endif
+  endfor
+end divide()
+
+void shift(int[] A, int leftIndex, int rightIndex)
+  arraycopy(A, leftIndex, A, leftIndex + 1, rightIndex - leftIndex)
+end shift()
