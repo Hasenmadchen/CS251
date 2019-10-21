@@ -13,6 +13,10 @@ public class MapTest {
         }
         System.out.println(treeMap.toString());
         printNode(treeMap.getRoot());
+
+        for (int i = 0; i < 10; i++) {
+            System.out.println(treeMap.get(i));
+        }
     }
 
 

@@ -1,3 +1,5 @@
+import java.util.NoSuchElementException;
+
 public class LeftLeaningRedBlackTreeMap<K extends Comparable<? super K>, V> {
     private Node<K, V> root;
     private int size;
@@ -50,7 +52,6 @@ public class LeftLeaningRedBlackTreeMap<K extends Comparable<? super K>, V> {
     }
 
     private Node<K, V> rotateRight(Node<K, V> node) {
-        // assert (node != null) && isRed(node.left);
         Node<K, V> rotated = node.getLeftChild();
         node.setLeftChild(rotated.getRightChild());
         rotated.setRightChild(node);
@@ -60,7 +61,6 @@ public class LeftLeaningRedBlackTreeMap<K extends Comparable<? super K>, V> {
     }
 
     private Node<K, V> rotateLeft(Node<K, V> node) {
-        // assert (node != null) && isRed(node.getRightChild());
         Node<K, V> rotated = node.getRightChild();
         node.setRightChild(rotated.getLeftChild());
         rotated.setLeftChild(node);
@@ -70,10 +70,6 @@ public class LeftLeaningRedBlackTreeMap<K extends Comparable<? super K>, V> {
     }
 
     private void flipColors(Node<K, V> node) {
-        // node must have opposite color of its two children
-        // assert (node != null) && (node.getLeftChild() != null) && (node.getRightChild() != null);
-        // assert (!isRed(node) &&  isRed(node.getLeftChild()) &&  isRed(node.getRightChild()))
-        //    || (isRed(node)  && !isRed(node.getLeftChild()) && !isRed(node.getRightChild()));
         node.flipColor();
         node.getLeftChild().flipColor();
         node.getRightChild().flipColor();
@@ -121,11 +117,11 @@ public class LeftLeaningRedBlackTreeMap<K extends Comparable<? super K>, V> {
         if (node.getKey().compareTo(key) == 0) {
             return node;
         } else if (node.getKey().compareTo(key) > 0) {
-            findNode(key, node.getLeftChild());
+            return findNode(key, node.getLeftChild());
         } else if (node.getKey().compareTo(key) < 0) {
-            findNode(key, node.getRightChild());
+            return findNode(key, node.getRightChild());
         }
-        return null; //should never get here
+        return null;
     }
 
     public void clear() {
@@ -163,27 +159,27 @@ public class LeftLeaningRedBlackTreeMap<K extends Comparable<? super K>, V> {
         if (object == null) {
             return false;
         }
-        if( object.getClass() != LeftLeaningRedBlackTreeMap.class ) {
+        if (object.getClass() != LeftLeaningRedBlackTreeMap.class) {
             return false;
         }
         LeftLeaningRedBlackTreeMap<K, V> that = (LeftLeaningRedBlackTreeMap<K, V>) object;
-        if( size != that.size ) {
+        if (size != that.size) {
             return false;
         }
-
-        boolean[] isEqual = {true};
-        root.breadthFirst( node -> {
-            Node thatNode = that.findNode(node.getKey(), that.root);
-            if(thatNode == null || !thatNode.equals(node)) {
-                isEqual[0] = false;
-                return false;
-            }
+        if (size == 0) {
             return true;
+        }
+
+        return root.breadthFirst(node -> {
+            Node thatNode = that.findNode(node.getKey(), that.root);
+            return thatNode != null && thatNode.equals(node);
         });
-        return isEqual[0];
     }
 
-    public K firstKey() throws NullPointerException {
+    public K firstKey() throws NoSuchElementException {
+        if (root == null) {
+            throw new NoSuchElementException();
+        }
         if (root.getLeftChild() == null) {
             return root.getKey();
         } else {
@@ -259,7 +255,10 @@ public class LeftLeaningRedBlackTreeMap<K extends Comparable<? super K>, V> {
         return (size == 0);
     }
 
-    public K lastKey() throws NullPointerException {
+    public K lastKey() throws NoSuchElementException {
+        if (root == null) {
+            throw new NoSuchElementException();
+        }
         if (root.getRightChild() == null) {
             return root.getKey();
         } else {
@@ -302,15 +301,17 @@ public class LeftLeaningRedBlackTreeMap<K extends Comparable<? super K>, V> {
     }
 
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        root.breadthFirst( node -> {
-            if(result.length() > 0) {
-                result.append(", ");
-            }
-            result.append(node.getKey() + ": " + node.getValue());
-            return true;
-        });
-        result.append('\n');
+        StringBuilder result = new StringBuilder("{");
+        if(root != null) {
+            root.breadthFirst(node -> {
+                if (result.length() > 1) {
+                    result.append(", ");
+                }
+                result.append(node.getKey()).append("=").append(node.getValue());
+                return true;
+            });
+        }
+        result.append('}');
         return result.toString();
     }
 

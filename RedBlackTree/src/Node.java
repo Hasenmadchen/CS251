@@ -238,13 +238,13 @@ public final class Node<K extends Comparable<? super K>, V> {
         } //end if
     } //equals
 
-    public void breadthFirst(Predicate<Node<K, V>> predicate) {
+    public boolean breadthFirst(Predicate<Node<K, V>> predicate) {
         List<Node<K, V>> list = new LinkedList<>();
         list.add(this);
         while (!list.isEmpty()) {
             Node<K, V> node = list.remove(0);
             if( !predicate.test(node) ) {
-                return;
+                return false;
             }
 
             if (node.leftChild != null) {
@@ -254,6 +254,7 @@ public final class Node<K extends Comparable<? super K>, V> {
                 list.add(node.rightChild);
             }
         }
+        return true;
     }
 
     /**
