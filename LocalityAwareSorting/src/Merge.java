@@ -73,7 +73,7 @@ public class Merge extends Sort {
 
     /* Function to merge the two haves arr[l..m] and arr[m+1..r] of array arr[] */
     @SuppressWarnings("unchecked")
-    static void merge(Comparable[] arr, int l, int m, int r, int d) {
+    static void merge(Comparable[] arr, int l, int m, int r) {
         int n1 = m - l + 1;
         int n2 = r - m;
 
