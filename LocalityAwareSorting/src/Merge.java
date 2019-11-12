@@ -61,8 +61,7 @@ public class Merge extends Sort {
                 // point of right
                 int mid = Math.min(left_start + curr_size - 1, n - 1);
 
-                int right_end = Math.min(left_start
-                    + 2 * curr_size - 1, n - 1);
+                int right_end = Math.min(left_start + 2 * curr_size - 1, n - 1);
 
                 // Merge Subarrays arr[left_start...mid]
                 // & arr[mid+1...right_end]

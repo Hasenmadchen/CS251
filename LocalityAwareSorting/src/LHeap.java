@@ -39,7 +39,7 @@ public class LHeap extends Sort {
         int n = arr.length;
         int window = d + 1;
 
-        for (int i = 0; i < n - d; i++) {
+        for (int i = 0; i < n - 1; i++) {
             heapifyWindow(arr, window, i);
         }
     }
@@ -52,6 +52,7 @@ public class LHeap extends Sort {
 
     // To heapify a subtree rooted with node i which is an index in arr[]. n is size of heap
     public static <E extends Comparable<? super E>> void heapify(E[] arr, int n, int i, int offset) {
+        n = n > arr.length ? arr.length : n;
         while (true) {
             int smallest = i; // Initialize smalles as root
             int l = 2 * (i - offset) + 1 + offset; // left = 2*i + 1
@@ -89,7 +90,7 @@ public class LHeap extends Sort {
 
         List<Integer> list = new ArrayList<>();
         try {
-            for (String line : Files.readAllLines(Paths.get("C:\\Users\\the_m\\cs251\\LocalityAwareSorting\\data\\10^3\\L5data.txt"))) {
+            for (String line : Files.readAllLines(Paths.get("C:\\Users\\the_m\\cs251\\LocalityAwareSorting\\data\\10^3\\L45data.txt"))) {
                 int num = Integer.parseInt(line);
                 list.add(num);
             }
@@ -97,7 +98,7 @@ public class LHeap extends Sort {
             throw new RuntimeException(e);
         }
         Integer[] numArray = list.toArray(new Integer[0]);
-        LHeap.sort(numArray, 5);
+        LHeap.sort(numArray, 45);
         System.out.println("list size: " + numArray.length);
         System.out.println("sorted: " + isSorted(numArray));
         Sort.show(numArray);

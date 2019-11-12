@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -54,14 +53,19 @@ public class LMerge extends Sort {
                 // Find ending point of left subarray. mid+1 is starting point of right
                 int mid = Math.min(left_start + curr_size - 1, n - 1);
 
-                int right_end = Math.min(left_start
-                    + 2 * curr_size - 1, n - 1);
+                int right_end = Math.min(left_start + 2 * curr_size - 1, n - 1);
 
                 //////////////////////////////////////////
                 // Narrow array size according to locality `d`
                 //////////////////////////////////////////
-                int left = Math.min(d, mid - left_start + 1);
-                int right = d < right_end - mid ? mid + d : right_end;
+                int left = left_start;
+                int right = right_end;
+                if (right_end - left_start + 1 > d) {
+                    left = mid - d / 2;
+                    left = Math.max(left, left_start);
+                    right = mid + d / 2;
+                    right = Math.min(right, right_end);
+                }
                 //////////////////////////////////////////
 
                 // Merge Subarrays arr[left_start...mid] & arr[mid+1...right_end]
@@ -82,7 +86,7 @@ public class LMerge extends Sort {
 
         // Copy data to temp arrays L[] and R[]
         System.arraycopy(arr, l, L, 0, n1);
-        System.arraycopy(arr, m+1, R, 0, n2);
+        System.arraycopy(arr, m + 1, R, 0, n2);
 
         // Merge the temp arrays back into arr[l..r]
         int i = 0;
@@ -121,8 +125,7 @@ public class LMerge extends Sort {
 
         List<Integer> list = new ArrayList<>();
         try {
-            for(String line: Files.readAllLines(Paths.get("C:\\Users\\the_m\\cs251\\LocalityAwareSorting\\data\\10^3\\L5data.txt")))
-            {
+            for (String line : Files.readAllLines(Paths.get("C:\\Users\\the_m\\cs251\\LocalityAwareSorting\\data\\10^3\\L45data.txt"))) {
                 int num = Integer.parseInt(line);
                 list.add(num);
             }
@@ -130,8 +133,9 @@ public class LMerge extends Sort {
             throw new RuntimeException(e);
         }
         Integer[] numArray = list.toArray(new Integer[0]);
-        LMerge.sort(numArray, 5);
-        System.out.println( "list size: " + numArray.length);
-        System.out.println( "sorted: " + isSorted(numArray));
+        LMerge.sort(numArray, 100);
+        System.out.println("list size: " + numArray.length);
+        System.out.println("sorted: " + isSorted(numArray));
+        Sort.show(numArray);
     }
 }
